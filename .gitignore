@@ -61,3 +61,7 @@ pip-wheel-metadata/
 
 # Windows artifacts
 Desktop.ini
+
+# Project-specific ignores
+00_Projects/01_Deep_Research_Agent/gpt.py
+00_Projects/01_Deep_Research_Agent/5C.py
