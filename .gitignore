@@ -1,0 +1,25 @@
+# Ignore backups of nested Git repositories
+**/.git.bak/
+
+# Python caches
+**/__pycache__/
+*.pyc
+
+# Virtual environments and Python version files
+**/.venv/
+**/.python-version
+
+# Environment files
+**/.env
+
+# Editor settings
+**/.vscode/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Chainlit runtime artifacts (optional)
+**/.chainlit/logs/
+**/.chainlit/db.sqlite
+
