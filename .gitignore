@@ -23,3 +23,41 @@ Thumbs.db
 **/.chainlit/logs/
 **/.chainlit/db.sqlite
 
+# Additional environment/config patterns
+**/*.env
+**/*.secrets*
+
+# Test, type-checker, and notebook caches
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.ipynb_checkpoints/
+
+# Coverage reports
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+site/
+**/*.egg-info/
+pip-wheel-metadata/
+.pytype/
+.nox/
+.tox/
+
+# Logs and local databases
+**/*.log
+**/logs/
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+
+# JetBrains IDE
+**/.idea/
+
+# Windows artifacts
+Desktop.ini
