@@ -34,16 +34,6 @@ model: OpenAIChatCompletionsModel = OpenAIChatCompletionsModel(
 )
 
 @function_tool
-def multiply(a: int, b: int) -> int:
-    """🧮 Exact multiplication (use this instead of guessing math)."""
-    return a * b
-
-@function_tool
-def sum(a: int, b: int) -> int:
-    """+ Exact addition (use this instead of guessing math)."""
-    return a + b
-
-@function_tool
 def search(query: str) -> str:
     print("[TOOL...]Searching for:", query)
     response = tavily_client.search(query)
@@ -72,6 +62,6 @@ agent = Agent(
     model=model,
     tools=[search],
 )
-runner = Runner.run_sync(agent, "Who is Prophet Muhammad (SAW)")
+runner = Runner.run_sync(agent, "Who is USA President?")
 print("\n Calling Search Agent\n")
 print(runner.final_output)

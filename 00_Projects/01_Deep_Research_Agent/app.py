@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
-from tavily import TavilyClient
+from tavily import AsyncTavilyClient
+from dataclasses import dataClass
 
 from agents import (
     Agent,
@@ -8,8 +9,8 @@ from agents import (
     AsyncOpenAI,
     OpenAIChatCompletionsModel,
     function_tool,
-    set_default_openai_client,
     set_tracing_disabled,
+    ModelSettings
 )
 
 load_dotenv()
@@ -17,9 +18,9 @@ load_dotenv()
 set_tracing_disabled(disabled=True)
 
 # Environment & Client Setup
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")
+tavily_client = AsyncTavilyClient(api_key=TAVILY_API_KEY)
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 external_client: AsyncOpenAI = AsyncOpenAI(
@@ -34,18 +35,27 @@ model: OpenAIChatCompletionsModel = OpenAIChatCompletionsModel(
 
 
 @function_tool
-def search(query: str) -> str:
+async def search(query: str) -> str:
     print("[TOOL...]Searching for:", query)
-    response = tavily_client.search(query)
-    return str(response)
+    response = await tavily_client.search(query, max_results=5)
+    return response
+
+@function_tool
+async def extract_content(urls: list) -> dict:
+    print("[TOOL...]Extracting content from URLs:", urls)
+    response = await tavily_client.extract(urls)
+
+    return response
 
 
-# 2. Searhc Agent
+# 2. Search Agent
 agent = Agent(
     name="Search Agent",
     model=model,
-    tools=[search],
+    tools=[search, extract_content],
+    instructions="You are a deep search agent.",
+    model_settings=ModelSettings(temperature=1.9, tool_choice="auto", max_tokens=1000)
 )
-runner = Runner.run_sync(agent, "Latest LLM Model released by china?")
+runner = Runner.run_sync(agent, "Research on the impact of Agentic AI White collar Jobs?")
 print("\n Calling Search Agent\n")
 print(runner.final_output)
