@@ -1,6 +1,8 @@
 import os
+import asyncio
 from dotenv import load_dotenv
-from tavily import TavilyClient
+from tavily import AsyncTavilyClient
+from dataclasses import dataclass
 
 from agents import (
     Agent,
@@ -8,8 +10,9 @@ from agents import (
     AsyncOpenAI,
     OpenAIChatCompletionsModel,
     function_tool,
-    set_default_openai_client,
-    set_tracing_disabled
+    set_tracing_disabled,
+    ModelSettings,
+    RunContextWrapper
 )
 
 load_dotenv()
@@ -17,9 +20,9 @@ load_dotenv()
 set_tracing_disabled(disabled=True)
 
 # Environment & Client Setup
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")
+tavily_client = AsyncTavilyClient(api_key=TAVILY_API_KEY)
 BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 external_client: AsyncOpenAI = AsyncOpenAI(
@@ -29,39 +32,50 @@ external_client: AsyncOpenAI = AsyncOpenAI(
 
 # Model Configuration
 model: OpenAIChatCompletionsModel = OpenAIChatCompletionsModel(
-    model="gemini-2.5-flash",
-    openai_client=external_client
+    model="gemini-2.5-flash", openai_client=external_client
 )
+
+@dataclass
+class UserInput:
+    query: str
+    urls: list
 
 @function_tool
-def search(query: str) -> str:
+async def search(local_context: RunContextWrapper[UserInput], query: str) -> str:
+    print("\n\n""Some Data: ", local_context.context.query, "\n\n")
     print("[TOOL...]Searching for:", query)
-    response = tavily_client.search(query)
+    response = await tavily_client.search(query, max_results=5)
+    return response
 
-# 1. Create Agent and register tools
-agent: Agent = Agent(
-    name="Assistant",
-    instructions=(
-        "You are a helpful assistant. "
-        "Always use tools for math questions. Always follow DMAS rule (division, multiplication, addition, subtraction). "
-        "Explain answers clearly and briefly for beginners."
-    ),
-    model=model,
-    tools=[multiply, sum],
-)
+@function_tool
+async def extract_content(local_context: RunContextWrapper[UserInput], urls: list) -> dict:
+    print("\n\n""Some Data: ", local_context.context.query, "\n\n")
+    print("[TOOL...]Extracting content from URLs:", urls)
+    response = await tavily_client.extract(urls)
 
-# Run Agent
-result = Runner.run_sync(agent, "What is 19 + 34 * 34")
+    return response
 
-print("\n Calling Agent\n")
-print(result.final_output)
 
-# 2. Searhc Agent
+# 2. Search Agent
 agent = Agent(
-    name="Searhc Agent",
+    name="Search Agent",
     model=model,
-    tools=[search],
+    tools=[search, extract_content],
+    instructions=(
+    "You are a deep search agent. "
+    "First, use the search tool to find relevant results. "
+    "Then, always call extract_content on the URLs to gather detailed content "
+    "before giving the final answer."
+),
+    model_settings=ModelSettings(temperature=1.9, tool_choice="auto", max_tokens=1000)
 )
-runner = Runner.run_sync(agent, "Who is USA President?")
-print("\n Calling Search Agent\n")
-print(runner.final_output)
+async def call_agent():
+    user_input = UserInput(query="What is the impact of Agentic AI on White collar jobs?", urls=[])
+    output = await Runner.run(
+        starting_agent=agent,
+        input="Who is PM of Pakistan?",
+        context=user_input
+    )
+    print("\n Calling Search Agent\n")
+    print(output.final_output)
+asyncio.run(call_agent())
