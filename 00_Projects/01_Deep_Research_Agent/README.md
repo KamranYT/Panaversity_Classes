@@ -2,38 +2,55 @@
 
 Make your computer do wild research runs so you don't have to. Minimal setup. Maximum vibes. 🚀🧠
 
-### ⚡ Quick Start
-1) Install uv → Windows (PowerShell): `iwr https://astral.sh/uv/install.ps1 -UseBasicParsing | iex`
+### 🧩 Project Details (Only)
 
-2) Sync deps → `uv sync`
+#### 🎯 Purpose
+Turn a single research prompt into a structured, multi-step investigation: gather sources, extract key points, and produce a concise summary with citations.
 
-3) Run it →
-- `uv run python main.py`
-- or (if venv active) `python main.py`
+#### 🧠 How It Works (High Level)
+- Takes a topic or question.
+- Expands it into sub-questions for deeper coverage.
+- Searches the web and collects candidate sources.
+- Extracts and ranks the most relevant insights.
+- Generates a final brief with references.
 
-### 🎛️ Optional Config
-Set env vars before running (if your script uses them):
-- PowerShell: `$Env:OPENAI_API_KEY = "your_key_here"`
-- bash: `export OPENAI_API_KEY="your_key_here"`
+#### 📥 Inputs
+- A research prompt/topic (e.g., "State of quantum networking in 2025").
+- Optional knobs: depth, max sources, output length.  
+Note: Exact flags/args depend on `main.py` implementation.
 
-Example (if args supported):
+#### 📤 Outputs
+- A short, skimmable brief with bullet points.
+- Inline citations and a sources list.
+- Optional structured JSON (headings, key points, links) if enabled.
+
+#### 🏗️ Internals (Conceptual)
+- Orchestrator in `main.py` coordinates the flow.
+- Pluggable steps for: query expansion, search, scraping, summarization.
+- Deterministic installs via `pyproject.toml` + `uv.lock`.
+
+#### 🧭 Scope & Non-Goals
+- Aimed at breadth-first + selective depth research, not exhaustive literature reviews.
+- Summaries are for rapid understanding, not academic citation.
+
+#### 🚧 Limitations
+- Dependent on availability/quality of online sources.
+- May require API keys for some providers.
+
+#### 🗺️ Roadmap Ideas
+- Source de-duplication & credibility scoring.
+- Multi-agent critique loop for higher accuracy.
+- Export to Markdown/PDF.
+- Config file for reproducible runs.
+
+### 📦 What’s Inside
 ```
-uv run python main.py --query "quantum networking" --depth 3
-```
-
-### 🗺️ What’s Inside
-```
-main.py         # the brain
-pyproject.toml  # deps & metadata (uv)
-uv.lock         # exact versions
-.python-version # python version
+main.py         # orchestrates the research flow
+pyproject.toml  # project metadata & dependencies (uv)
+uv.lock         # pinned versions for reproducibility
+.python-version # python version target
 .venv/          # local venv (optional)
 ```
-
-### 🛠️ Pro Tips
-- No activate? No problem → use `uv run`.
-- Missing uv? Reopen terminal after install.
-- Need more power? `uv add <package>`
 
 ### 📜 License
 Pick one you like (MIT recommended). Add a `LICENSE` file.
