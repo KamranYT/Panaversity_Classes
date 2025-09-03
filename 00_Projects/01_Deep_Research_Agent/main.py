@@ -69,11 +69,14 @@ agent = Agent(
 ),
     model_settings=ModelSettings(temperature=1.9, tool_choice="auto", max_tokens=1000)
 )
+
+user_query = input("Enter your query: ")
+
 async def call_agent():
-    user_input = UserInput(query="What is the impact of Agentic AI on White collar jobs?", urls=[])
+    user_input = UserInput(query=user_query, urls=[])
     output = await Runner.run(
         starting_agent=agent,
-        input="Who is PM of Pakistan?",
+        input=user_query,
         context=user_input
     )
     print("\n Calling Search Agent\n")
