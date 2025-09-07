@@ -43,8 +43,12 @@ agent: Agent = Agent(
 )
 
 
-result = Runner.run_sync(agent, user_query)
-
+try:
+    result = Runner.run_sync(agent, user_query)
+    print("\nCALLING AGENT\n")
+    print(result.final_output)
+except Exception as e:
+    print("Agent error:", e)
 
 print("\nCALLING AGENT\n")
 print(result.final_output)
